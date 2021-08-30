@@ -18,9 +18,11 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Install tfenv
-        run: echo Hello, world!
-        
-      - name: Install correct versio
+        run: |
+          git clone https://github.com/tfutils/tfenv.git ~/.tfenv
+          ln -s ~/.tfenv/bin/* /usr/local/bin
+
+      - name: Install correct version
         run: |
           tfenv install
           tfenv use
