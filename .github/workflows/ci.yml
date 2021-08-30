@@ -1,0 +1,35 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install tfenv
+        run: echo Hello, world!
+        
+      - name: Install correct versio
+        run: |
+          tfenv install
+          tfenv use
+
+      - name: Initialize
+        run: terraform init
+
+      - name: Check the formatting
+        run: terraform fmt --check
+
+      - name: Validate
+        run: terraform
