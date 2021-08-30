@@ -20,7 +20,7 @@ jobs:
       - name: Install tfenv
         run: |
           git clone https://github.com/tfutils/tfenv.git ~/.tfenv
-          ln -ns ~/.tfenv/bin/* /usr/local/bin
+          ln -nfs ~/.tfenv/bin/* /usr/local/bin
 
       - name: Install correct version
         run: |
