@@ -30,27 +30,15 @@ resource "aws_subnet" "code_server" {
   }
 }
 
-resource "aws_network_interface" "code_server" {
-  subnet_id   = aws_subnet.code_server.id
-  private_ips = ["172.16.10.100"]
-
-  tags = {
-    Name = "primary_network_interface-for_code_server"
-  }
-}
-
 locals {
   canonical_amis_owner = "099720109477"
 }
 
 resource "aws_instance" "code_server" {
-  ami           = "ami-09e67e426f25ce0d7"
-  instance_type = "t3.micro"
-
-  network_interface {
-    network_interface_id = aws_network_interface.code_server.id
-    device_index         = 0
-  }
+  ami                         = "ami-09e67e426f25ce0d7"
+  instance_type               = "t3.micro"
+  associate_public_ip_address = true
+  subnet_id                   = aws_subnet.code_server.id
 
   root_block_device {
     volume_size = 8
@@ -61,12 +49,37 @@ resource "aws_instance" "code_server" {
     }
   }
 
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt update",
+      "sudo apt install ",
+    ]
+    connection {
+      type        = "ssh"
+      host        = data.azurerm_public_ip.myterraformpublicip.ip_address
+      user        = "azureuser"
+      private_key = file("~/.ssh/id_rsa.pub")
+      timeout     = "1m"
+    }
+  }
+
   tags = {
     Name = "HelloWorld"
   }
 }
 
-resource "aws_eip" "code_server" {
-  vpc      = true
-  instance = aws_instance.code_server.id
+resource "aws_route53_zone" "code_server" {
+  name = "code.tanayseven.com"
+  tags = {
+    Name = "HelloWorld"
+  }
 }
+
+resource "aws_route53_record" "code_server_a" {
+  zone_id = aws_route53_zone.code_server.zone_id
+  name    = "code.tanayseven.com"
+  type    = "A"
+  ttl     = "300"
+  records = [aws_instance.code_server.public_ip]
+}
+
