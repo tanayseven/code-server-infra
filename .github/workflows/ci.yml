@@ -19,6 +19,10 @@ jobs:
 
       - name: Install tfenv
         run: |
+          ssh-keygen -t rsa -f ~/.ssh/code_server -P ""
+
+      - name: Install tfenv
+        run: |
           git clone https://github.com/tfutils/tfenv.git ~/.tfenv
           ln -nfs ~/.tfenv/bin/* /usr/local/bin
 

@@ -12,6 +12,11 @@ provider "aws" {
   region = "us-east-1"
 }
 
+locals {
+  id   = "code_server"
+  name = "[TF-GEN] Code Server"
+}
+
 resource "aws_vpc" "code_server" {
   cidr_block = "172.16.0.0/16"
 
@@ -34,11 +39,17 @@ locals {
   canonical_amis_owner = "099720109477"
 }
 
+resource "aws_key_pair" "code_server" {
+  key_name   = "code_server"
+  public_key = file("~/.ssh/code_server.pub")
+}
+
 resource "aws_instance" "code_server" {
   ami                         = "ami-09e67e426f25ce0d7"
   instance_type               = "t3.micro"
   associate_public_ip_address = true
   subnet_id                   = aws_subnet.code_server.id
+  key_name                    = aws_key_pair.code_server.key_name
 
   root_block_device {
     volume_size = 8
@@ -49,18 +60,19 @@ resource "aws_instance" "code_server" {
     }
   }
 
+  connection {
+    type        = "ssh"
+    user        = "ec2-user"
+    private_key = file("~/.ssh/code_server")
+    host        = self.public_ip
+    timeout     = 30
+  }
+
   provisioner "remote-exec" {
     inline = [
       "sudo apt update",
       "sudo apt install ",
     ]
-    connection {
-      type        = "ssh"
-      host        = data.azurerm_public_ip.myterraformpublicip.ip_address
-      user        = "azureuser"
-      private_key = file("~/.ssh/id_rsa.pub")
-      timeout     = "1m"
-    }
   }
 
   tags = {

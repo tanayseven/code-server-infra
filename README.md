@@ -19,5 +19,6 @@ aws_secret_access_key = aa1234b56cD7EFgHIJklMn0pqRSTUvWxY8ab9cDE
 tfenv install
 tfenv use
 ```
+4a. To setup a new keypair run: `ssh-keygen -t rsa -f ~/.ssh/code_server -P ""`
 5. To spin up the infrastructure, run `terraform apply`
 6. To shut down the infrastructure run `terraform destroy`
