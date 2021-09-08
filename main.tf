@@ -13,7 +13,7 @@ provider "aws" {
 }
 
 locals {
-  id   = "code_server"
+  id   = "tf_gen_code_server"
   name = "[TF-GEN] Code Server"
 }
 
@@ -21,7 +21,7 @@ resource "aws_vpc" "code_server" {
   cidr_block = "172.16.0.0/16"
 
   tags = {
-    Name = "HelloWorld"
+    Name = local.name
   }
 }
 
@@ -29,9 +29,10 @@ resource "aws_subnet" "code_server" {
   vpc_id            = aws_vpc.code_server.id
   cidr_block        = "172.16.10.0/24"
   availability_zone = "us-east-1a"
+  map_public_ip_on_launch = true
 
   tags = {
-    Name = "HelloWorld"
+    Name = local.name
   }
 }
 
@@ -42,6 +43,9 @@ locals {
 resource "aws_key_pair" "code_server" {
   key_name   = "code_server"
   public_key = file("~/.ssh/code_server.pub")
+  tags = {
+    Name = local.name
+  }
 }
 
 resource "aws_instance" "code_server" {
@@ -50,40 +54,67 @@ resource "aws_instance" "code_server" {
   associate_public_ip_address = true
   subnet_id                   = aws_subnet.code_server.id
   key_name                    = aws_key_pair.code_server.key_name
-
+  security_groups             = [aws_security_group.code_server.id]
   root_block_device {
     volume_size = 8
     volume_type = "gp3"
-
     tags = {
-      Name = "HelloWorld"
+      Name = local.name
     }
   }
-
   connection {
     type        = "ssh"
     user        = "ec2-user"
     private_key = file("~/.ssh/code_server")
     host        = self.public_ip
-    timeout     = 30
+    timeout     = "2m"
   }
-
   provisioner "remote-exec" {
     inline = [
       "sudo apt update",
-      "sudo apt install ",
+      "sudo apt install nginx",
+      "sudo service nginx start",
     ]
   }
-
   tags = {
-    Name = "HelloWorld"
+    Name = local.name
+  }
+}
+
+resource "aws_security_group" "code_server" {
+  name        = local.name
+  description = "Allow TLS inbound traffic"
+  vpc_id      = aws_vpc.code_server.id
+  # ingress {
+  #   description      = "TLS from VPC"
+  #   from_port        = 443
+  #   to_port          = 443
+  #   protocol         = "tcp"
+  # }
+  ingress {
+    description      = "SSH"
+    from_port        = 0
+    to_port          = 22
+    protocol         = "tcp"
+    # cidr_blocks      = ["0.0.0.0/0"]
+    # ipv6_cidr_blocks = ["::/0"]
+  }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "tcp"
+    # cidr_blocks      = ["0.0.0.0/0"]
+    # ipv6_cidr_blocks = ["::/0"]
+  }
+  tags = {
+    Name = local.name
   }
 }
 
 resource "aws_route53_zone" "code_server" {
   name = "code.tanayseven.com"
   tags = {
-    Name = "HelloWorld"
+    Name = local.id
   }
 }
 
@@ -94,4 +125,3 @@ resource "aws_route53_record" "code_server_a" {
   ttl     = "300"
   records = [aws_instance.code_server.public_ip]
 }
-
