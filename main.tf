@@ -18,7 +18,42 @@ locals {
 }
 
 resource "aws_vpc" "code_server" {
-  cidr_block = "172.16.0.0/16"
+  cidr_block           = "172.16.0.0/16"
+  enable_dns_hostnames = true
+
+  tags = {
+    Name = local.name
+  }
+}
+
+resource "aws_internet_gateway" "code_server" {
+  vpc_id = aws_vpc.code_server.id
+
+  tags = {
+    Name = local.name
+  }
+}
+
+resource "aws_default_route_table" "example" {
+  default_route_table_id = aws_vpc.code_server.default_route_table_id
+
+  route = [
+    {
+      cidr_block                 = "0.0.0.0/0"
+      gateway_id                 = aws_internet_gateway.code_server.id
+      carrier_gateway_id         = ""
+      destination_prefix_list_id = ""
+      egress_only_gateway_id     = ""
+      instance_id                = ""
+      ipv6_cidr_block            = "::/0"
+      local_gateway_id           = ""
+      nat_gateway_id             = ""
+      network_interface_id       = ""
+      transit_gateway_id         = ""
+      vpc_endpoint_id            = ""
+      vpc_peering_connection_id  = ""
+    },
+  ]
 
   tags = {
     Name = local.name
@@ -30,14 +65,14 @@ resource "tls_private_key" "key" {
 }
 
 resource "local_file" "private_key" {
-  filename          = "~/.ssh/code_server"
+  filename          = "./code-server.pem"
   sensitive_content = tls_private_key.key.private_key_pem
   file_permission   = "0400"
 
 }
 
 resource "aws_key_pair" "code_server" {
-  key_name   = "~/.ssh/code_server.pub"
+  key_name   = "code_server"
   public_key = tls_private_key.key.public_key_openssh
   tags = {
     Name = local.name
@@ -64,20 +99,14 @@ resource "aws_instance" "code_server" {
   associate_public_ip_address = true
   subnet_id                   = aws_subnet.code_server.id
   key_name                    = aws_key_pair.code_server.key_name
-  security_groups             = [aws_default_security_group.code_server.id]
+  security_groups             = [aws_security_group.code_server.id]
+  vpc_security_group_ids      = [aws_security_group.code_server.id]
   root_block_device {
     volume_size = 8
     volume_type = "gp3"
     tags = {
       Name = local.name
     }
-  }
-  connection {
-    type        = "ssh"
-    user        = "ec2-user"
-    private_key = file("~/.ssh/code_server")
-    host        = self.public_ip
-    timeout     = "2m"
   }
   provisioner "remote-exec" {
     inline = [
@@ -89,7 +118,7 @@ resource "aws_instance" "code_server" {
     connection {
       type        = "ssh"
       user        = "ec2-user"
-      private_key = file("~/.ssh/code_server")
+      private_key = file("./code_server.pem")
       host        = self.public_ip
     }
   }
@@ -98,7 +127,7 @@ resource "aws_instance" "code_server" {
   }
 }
 
-resource "aws_default_security_group" "code_server" {
+resource "aws_security_group" "code_server" {
   # name        = local.name
   # description = "Allow TLS inbound traffic"
   vpc_id = aws_vpc.code_server.id
