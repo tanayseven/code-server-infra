@@ -118,7 +118,7 @@ resource "aws_instance" "code_server" {
     connection {
       type        = "ssh"
       user        = "ec2-user"
-      private_key = file("./code_server.pem")
+      private_key = local_file.private_key.sensitive_content
       host        = self.public_ip
     }
   }
