@@ -13,8 +13,8 @@ provider "aws" {
 }
 
 locals {
-  id   = "tf_gen_code_server"
-  name = "[TF-GEN] Code Server"
+  id   = "terraform_created_code_server"
+  name = "[TERRAFORM-CREATED] Code Server"
 }
 
 resource "aws_vpc" "code_server" {
