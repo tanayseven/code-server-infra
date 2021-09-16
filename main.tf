@@ -34,27 +34,25 @@ resource "aws_internet_gateway" "code_server" {
   }
 }
 
-resource "aws_default_route_table" "example" {
+resource "aws_default_route_table" "code_server" {
   default_route_table_id = aws_vpc.code_server.default_route_table_id
-
   route = [
     {
       cidr_block                 = "0.0.0.0/0"
       gateway_id                 = aws_internet_gateway.code_server.id
       carrier_gateway_id         = ""
-      destination_prefix_list_id = ""
       egress_only_gateway_id     = ""
       instance_id                = ""
-      ipv6_cidr_block            = "::/0"
       local_gateway_id           = ""
       nat_gateway_id             = ""
       network_interface_id       = ""
       transit_gateway_id         = ""
       vpc_endpoint_id            = ""
       vpc_peering_connection_id  = ""
+      destination_prefix_list_id = ""
+      ipv6_cidr_block            = ""
     },
   ]
-
   tags = {
     Name = local.name
   }
@@ -112,12 +110,12 @@ resource "aws_instance" "code_server" {
     inline = [
       "chmod 400 ~/.ssh/code_server",
       "sudo apt update",
-      "sudo apt install nginx",
+      "sudo apt -y install nginx",
       "sudo service nginx start",
     ]
     connection {
       type        = "ssh"
-      user        = "ec2-user"
+      user        = "ubuntu"
       private_key = local_file.private_key.sensitive_content
       host        = self.public_ip
     }
@@ -128,8 +126,6 @@ resource "aws_instance" "code_server" {
 }
 
 resource "aws_security_group" "code_server" {
-  # name        = local.name
-  # description = "Allow TLS inbound traffic"
   vpc_id = aws_vpc.code_server.id
   ingress = [
     {
@@ -162,17 +158,21 @@ resource "aws_security_group" "code_server" {
   }
 }
 
-resource "aws_route53_zone" "code_server" {
-  name = "code.tanayseven.com"
-  tags = {
-    Name = local.id
-  }
-}
+# resource "aws_route53_zone" "code_server" {
+#   name = "code.tanayseven.com"
+#   tags = {
+#     Name = local.id
+#   }
+# }
 
-resource "aws_route53_record" "code_server_a" {
-  zone_id = aws_route53_zone.code_server.zone_id
-  name    = "code.tanayseven.com"
-  type    = "A"
-  ttl     = "300"
-  records = [aws_instance.code_server.public_ip]
+# resource "aws_route53_record" "code_server_a" {
+#   zone_id = aws_route53_zone.code_server.zone_id
+#   name    = "code.tanayseven.com"
+#   type    = "A"
+#   ttl     = "300"
+#   records = [aws_instance.code_server.public_ip]
+# }
+
+output "code_server_ip_address" {
+  value = aws_instance.code_server.public_ip
 }
