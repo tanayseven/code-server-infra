@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = "us-east-2"
 }
 
 locals {
@@ -80,7 +80,7 @@ resource "aws_key_pair" "code_server" {
 resource "aws_subnet" "code_server" {
   vpc_id                  = aws_vpc.code_server.id
   cidr_block              = "172.16.10.0/24"
-  availability_zone       = "us-east-1a"
+  availability_zone       = "us-east-2a"
   map_public_ip_on_launch = true
   tags = {
     Name = local.name
@@ -91,8 +91,16 @@ locals {
   canonical_amis_owner = "099720109477"
 }
 
+data "aws_ami" "code_server" {
+  owners = ["self"]
+  filter {
+    name = "name"
+    values = ["tf-gen-code-server"]
+  }
+}
+
 resource "aws_instance" "code_server" {
-  ami                         = "ami-09e67e426f25ce0d7"
+  ami                         = data.aws_ami.code_server.image_id
   instance_type               = "t3.micro"
   associate_public_ip_address = true
   subnet_id                   = aws_subnet.code_server.id
@@ -108,10 +116,7 @@ resource "aws_instance" "code_server" {
   }
   provisioner "remote-exec" {
     inline = [
-      "chmod 400 ~/.ssh/code_server",
-      "sudo apt update",
-      "sudo apt -y install nginx",
-      "sudo service nginx start",
+      "cat ~/.config/code-server/config.yaml",
     ]
     connection {
       type        = "ssh"

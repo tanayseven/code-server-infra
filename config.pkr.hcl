@@ -8,9 +8,9 @@ packer {
 }
 
 source "amazon-ebs" "ubuntu" {
-  ami_name      = "learn-packer-linux-aws"
+  ami_name      = "tf-gen-code-server"
   instance_type = "t2.micro"
-  region        = "us-west-2"
+  region        = "us-east-2"
   source_ami_filter {
     filters = {
       name                = "ubuntu/images*ubuntu-*-20.04-amd64-server-*"
@@ -31,9 +31,42 @@ build {
 
   provisioner "shell" {
     inline = [
-      "sudo apt update",
-      "sudo apt -y install nginx",
+      "sudo rm -r /var/lib/apt/lists/*",
+      "sudo apt-get update",
+      "sudo apt-get -y install nginx",
       "sudo service nginx start",
+    ]
+  }
+
+  provisioner "file" {
+    source = "./files/code-server_3.12.0_amd64.deb"
+    destination = "/tmp/code-server_3.12.0_amd64.deb"
+  }
+
+  provisioner "file" {
+    source = "./files/code-server.service"
+    destination = "/tmp/code-server.service"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "sudo dpkg -i /tmp/code-server_3.12.0_amd64.deb",
+      "sudo cp /tmp/code-server.service /etc/systemd/system/code-server.service",
+      "sudo service code-server start",
+    ]
+  }
+
+  provisioner "file" {
+    source = "./files/nginx-conf"
+    destination = "/tmp/nginx-conf"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "sudo cp /tmp/nginx-conf /etc/nginx/sites-available/conf",
+      "sudo ln -s /etc/nginx/sites-available/conf /etc/nginx/sites-enabled/conf",
+      "sudo service nginx configtest",
+      "sudo service nginx restart",
     ]
   }
 }

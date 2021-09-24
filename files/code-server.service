@@ -1,0 +1,13 @@
+[Unit]
+Description=Code Server Service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=ubuntu
+ExecStart=/usr/bin/code-server
+
+[Install]
+WantedBy=nginx

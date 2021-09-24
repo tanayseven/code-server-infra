@@ -1,10 +1,19 @@
 [![CI](https://github.com/tanayseven/code-server-infra/actions/workflows/ci.yml/badge.svg)](https://github.com/tanayseven/code-server-infra/actions/workflows/ci.yml)
 
+[![License](https://img.shields.io/github/license/tanayseven/code-server-infra.svg)](https://opensource.org/licenses/MIT)
+
 Code Server Infra
 =================
 
-Local setup steps
------------------
+Steps to build the AMI
+----------------------
+
+1. To perform the build, run `packer build config.pkr.hcl`
+2. This will create a Snapshot and register an AMI
+3. This is chargable so be aware of that (deregister the AMI and delete the snapshot if not needed anymore)
+
+Steps to run the VM in cloud
+----------------------------
 
 1. Install [tfenv](https://github.com/tfutils/tfenv)
 2. Login into your AWS account from CLI `aws login`
