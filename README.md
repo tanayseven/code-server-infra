@@ -11,6 +11,7 @@ Steps to build the AMI
 1. To perform the build, run `packer build config.pkr.hcl`
 2. This will create a Snapshot and register an AMI
 3. This is chargable so be aware of that (deregister the AMI and delete the snapshot if not needed anymore)
+4. If you want to delete and deregister image, run `aws ec2 deregister-image --image-id ami-0a1b2c3d4e && aws ec2 delete-snapshot --snapshot-id snap-0a1b2c3d4e` (make sure your region is configured correctly, check the file `~/.aws/config`)
 
 Steps to run the VM in cloud
 ----------------------------

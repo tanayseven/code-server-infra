@@ -52,6 +52,7 @@ build {
     inline = [
       "sudo dpkg -i /tmp/code-server_3.12.0_amd64.deb",
       "sudo cp /tmp/code-server.service /etc/systemd/system/code-server.service",
+      "sudo service code-server enable",
       "sudo service code-server start",
     ]
   }
@@ -65,6 +66,7 @@ build {
     inline = [
       "sudo cp /tmp/nginx-conf /etc/nginx/sites-available/conf",
       "sudo ln -s /etc/nginx/sites-available/conf /etc/nginx/sites-enabled/conf",
+      "sudo rm /etc/nginx/sites-enabled/default",
       "sudo service nginx configtest",
       "sudo service nginx restart",
     ]
