@@ -94,7 +94,7 @@ locals {
 data "aws_ami" "code_server" {
   owners = ["self"]
   filter {
-    name = "name"
+    name   = "name"
     values = ["tf-gen-code-server"]
   }
 }

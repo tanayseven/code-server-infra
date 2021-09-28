@@ -1,6 +1,6 @@
 [![CI](https://github.com/tanayseven/code-server-infra/actions/workflows/ci.yml/badge.svg)](https://github.com/tanayseven/code-server-infra/actions/workflows/ci.yml)
 
-[![License](https://img.shields.io/github/license/tanayseven/code-server-infra.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/github/license/tanayseven/code-server-infra)](https://opensource.org/licenses/MIT)
 
 Code Server Infra
 =================
