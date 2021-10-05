@@ -35,6 +35,9 @@ build {
       "sudo apt-get update",
       "sudo apt-get -y install nginx",
       "sudo service nginx start",
+      "sudo snap install core && sudo snap refresh core",
+      "sudo snap install --classic certbot",
+      "sudo ln -s /snap/bin/certbot /usr/bin/certbot",
     ]
   }
 
@@ -52,8 +55,8 @@ build {
     inline = [
       "sudo dpkg -i /tmp/code-server_3.12.0_amd64.deb",
       "sudo cp /tmp/code-server.service /etc/systemd/system/code-server.service",
-      "sudo service code-server enable",
-      "sudo service code-server start",
+      "sudo systemctl enable code-server",
+      "sudo systemctl start code-server",
     ]
   }
 
