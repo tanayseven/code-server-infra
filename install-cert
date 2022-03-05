@@ -1,0 +1,1 @@
+ssh ubuntu@$1 -i ./code-server.pem "sudo certbot --nginx --non-interactive --agree-tos -m tanayseven@gmail.com --domains code.tanayseven.com"

@@ -163,21 +163,6 @@ resource "aws_security_group" "code_server" {
   }
 }
 
-# resource "aws_route53_zone" "code_server" {
-#   name = "code.tanayseven.com"
-#   tags = {
-#     Name = local.id
-#   }
-# }
-
-# resource "aws_route53_record" "code_server_a" {
-#   zone_id = aws_route53_zone.code_server.zone_id
-#   name    = "code.tanayseven.com"
-#   type    = "A"
-#   ttl     = "300"
-#   records = [aws_instance.code_server.public_ip]
-# }
-
 output "code_server_ip_address" {
   value = aws_instance.code_server.public_ip
 }
